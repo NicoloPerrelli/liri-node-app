@@ -27,7 +27,7 @@ switch (process.argv[2]){
 	break;
 
 	case "do-what-it-says":
-		do_what_it_says(askName);
+		do_what_it_says();
 	break;
 }
 
@@ -55,7 +55,7 @@ function spotify_this_song(x){
 
 	var Spotify = require('node-spotify-api');
  
-	var spotify = new Spotify({
+	var spotify = new Spotify({//keys grabed from keys.js
 		id: keys[0],
   		secret: keys[1]
 	});
@@ -67,7 +67,6 @@ function spotify_this_song(x){
 		console.log("Song name: " + JSON.parse(data).name);
 		console.log("Link: " + JSON.parse(data).link);
 		console.log("Album: " + JSON.parse(data).album);
-
 	});
 }
 
@@ -113,20 +112,27 @@ function movie_this(x){
 	}});
 }
 
-function do_what_it_says(x){
+function do_what_it_says(){//grab text from random then test what we need to do again.
+	$.get('random.txt',{},function(content){
+      let lines=content
 
+		switch (lines[0]){
+
+			case "concert-this":
+				concert_this(lines[1]);
+			break;
+		
+			case "spotify-this-song":
+				spotify_this_song(lines[1]);
+			break;
+		
+			case "movie-this":
+				movie_this(lines[1]);
+			break;
+		//no do-what is says else we could be stuck in a loop forever.
+		}
+	});
 }
-/*
-	4. `node liri.js do-what-it-says`
-
-	* Using the `fs` Node package, LIRI will take the text inside of random.txt and then use it to call one of LIRI's commands.
-
-	  * It should run `spotify-this-song` for "I Want it That Way," as follows the text in `random.txt`.
-
-	  * Edit the text in random.txt to test out the feature for movie-this and concert-this.
-
-*/
-
 
 /*
 ### BONUS
