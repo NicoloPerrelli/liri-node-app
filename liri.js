@@ -1,14 +1,16 @@
 require("dotenv").config();
+var request = require("request");
 var keys = require("./keys.js");
-console.log(keys);
 
 var nodeArgs = process.argv;
 var askName = "";
 
 //throws the switch the needed info
-for (var i = 2; i < nodeArgs.length; i++) {
-	if (i > 2 && i < nodeArgs.length) {askName = askName + "+" + nodeArgs[i];}
-	else {askName += nodeArgs[i];}
+for (var i = 3; i < nodeArgs.length; i++) {
+	if(i==3)
+		askName = nodeArgs[i];
+	else
+		askName = askName + "+" + nodeArgs[i];
 }
 
 // finds what to do with movie or band
@@ -36,10 +38,10 @@ function concert_this(x){
 	request("https://rest.bandsintown.com/artists/" + x + "/events?app_id=codingbootcamp", function(error, response, body){
 		if (!error && response.statusCode === 200) {
 
-			console.log("The Name of the venue: " + JSON.parse(body).name);
-			console.log("The Venue location: " + JSON.parse(body).location);
-			console.log("The Date of the Event: " + JSON.parse(body).date);
-	}});
+			var jsonData = JSON.parse(body);
+			for(let i = 0; i < jsonData.length; i++){
+			console.log("\n==========================================\nThe Name of the venue: " + jsonData[i].venue.name + "\nThe Venue location: " + jsonData[i].venue.city + ", " + jsonData[i].venue.country + "\nThe Date of the Event: " + jsonData[i].datetime + "\n==========================================");
+	}}});
 /*
 	  * Name of the venue
 	  * Venue location
@@ -54,26 +56,20 @@ function spotify_this_song(x){
 	x="The Sign"
 
 	var Spotify = require('node-spotify-api');
- 
-	var spotify = new Spotify({//keys grabed from keys.js
-		id: keys[0],
-  		secret: keys[1]
-	});
- 
-	spotify.search({ type: 'track', query: x }, function(err, data) {
-		  if (err) {console.log('Error occurred: ' + err);}
-		  
-		console.log("Artist(s): " + JSON.parse(data).artist);
-		console.log("Song name: " + JSON.parse(data).name);
-		console.log("Link: " + JSON.parse(data).link);
-		console.log("Album: " + JSON.parse(data).album);
-	});
+	
+	var spotify = new Spotify(keys.spotify);
+
+spotify
+  .search({ type: 'track', query:x})
+  .then(function(response) {
+    console.log("Artist: " + response.tracks.items[0].album.artists[0].name + "\nAlbum: " + response.tracks.items[0].album.name + "\nLink: " + response.tracks.items[0].album.artists[0].external_urls.spotify);
+  })
+  .catch(function(err) {
+    console.log(err);
+  });
 }
 
 /*
-	  * Artist(s)
-	  * The song's name
-	  * A preview link of the song from Spotify
 	  * The album that the song is from
 
 	* You will utilize the [node-spotify-api](https://www.npmjs.com/package/node-spotify-api) package in order to retrieve song information from the Spotify API.
@@ -100,19 +96,15 @@ function movie_this(x){
 		// If there were no errors and the response code was 200 (i.e. the request was successful)...
 		if (!error && response.statusCode === 200) {
 
+			var jsonData = JSON.parse(body);
 			// Then we print out the imdbRating
-			console.log("The movie's Title is: " + JSON.parse(body).title);
-			console.log("The movie's Year of Release is: " + JSON.parse(body).year);
-			console.log("The movie's IMDB Rating is: " + JSON.parse(body).imdbRating);
-			console.log("The movie's Rotten Tomatoes Rating is: " + JSON.parse(body).rottenTomatoesRating);
-			console.log("The movie is made in: " + JSON.parse(body).country);
-			console.log("The movie's Language is: " + JSON.parse(body).language);
-			console.log("The movie's Plot is: " + JSON.parse(body).imdbRating);
-			console.log("The movie's Actors are: " + JSON.parse(body).actors);
+
+			console.log("\n==========================================================================" + "\nMovie Title: " + jsonData.Title + "\nYear of Release: " + jsonData.Year + "\nIMDB Rating is: " + jsonData.Ratings[0].Value + "\nRotten Tomatoes Rating is: " + jsonData.Ratings[1].Value + "\nIs made in: " + jsonData.Country + "\nThe movie's Language(s): " + jsonData.Language + "\nThe Actors are: " + jsonData.Actors + "\n\nThe Plot is: " + jsonData.Plot + "\n==========================================================================");
 	}});
 }
 
 function do_what_it_says(){//grab text from random then test what we need to do again.
+	console.log("ENTERHERE")
 	$.get('random.txt',{},function(content){
       let lines=content
 
